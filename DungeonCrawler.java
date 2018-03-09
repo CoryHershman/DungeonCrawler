@@ -13,41 +13,23 @@
 import java.util.Scanner;
 
 public class DungeonCrawler {
-
+  
   public static void main(String[] args) {
-    Player player = new Player(); // Instantiate player Object
-    Monster monster = new Monster(); // Instantiate monster Object
-    Dungeon dungeon = new Dungeon(16, player, monster); // Size 16, linked to the player and monster
-    player.setDungeon(dungeon); // Link to the dungeon Object
-    player.setMonster(monster); // Link to the monster Object
-    monster.setDungeon(dungeon); // Link to the dungeon Object
-    monster.setPlayer(player); // Link to the player Object
-
-    setup(player, monster, dungeon); // Setup method to start of the game
 
     Scanner scan = new Scanner(System.in); // Used to scan in user commands
-
-    // Infinite while loop that will continue until the game ends
-    while (true) {
-      String input = scan.nextLine(); // Holds the user's response
-      if (input.equalsIgnoreCase("right") || input.equalsIgnoreCase("r")) {
-        player.moveRight(); // Call the moveRight method
-      } else if (input.equalsIgnoreCase("attack") || input.equalsIgnoreCase("a")) {
-        player.attack(); // Call the attack method
-      } else if (input.equalsIgnoreCase("heal") || input.equalsIgnoreCase("h")) {
-        player.heal(); // Call the heal method
-      } else { // If user enters a non-valid response
-        System.out.println("That was not a valid input, try again");
-        continue; // Restart the while loop, asking for the user's response again
-      }
-      monster.moveLeft(); // The monster moves left
-      monster.attack(); // The monster tries to attack
-      dungeon.drawDungeon(); // The dungeon is redrawn
-      System.out.println("Your HP: " + player.hitPoints + "     Monsters HP: " + monster.hitPoints);
+    System.out.println("Server or Client?");
+    String input = scan.nextLine();
+    if(input.equalsIgnoreCase("Server")) {
+      Server server = new Server();
+      server.run();
+    } else if(input.equalsIgnoreCase("Client")) {
+      Client client = new Client();
+      client.run();
     }
+    
   }
 
-  public static void setup(Player player, Monster monster, Dungeon dungeon) {
+  public static void start() {
 
     // Exposition for the player to read before playing
     System.out.println("You are an adventurer, "
@@ -71,28 +53,18 @@ public class DungeonCrawler {
     System.out.println("Tip: There is no need to ever have a dexterity above 17 "
         + "or a crit chance above 100\n");
 
-    // The player levels up 9 times
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-    player.levelUp();
-
-    // The monster levels up 4 times
-    monster.levelUp();
-    monster.levelUp();
-    monster.levelUp();
-    monster.levelUp();
-
-    // nextFloor method is called to start the first floor. Both the player and
-    // monster level up 1 more time
-    dungeon.nextFloor();
-    System.out.println("You control your hero by typing in commands. \nThere are three commands: "
-        + "\"right\" to move right, \"attack\" to attack, \"heal\" to heal wounds. "
-        + "\nIt is also acceptable to type either \"r\" \"a\" or \"h\".\n");
+    
+  }
+  
+  public static void levelUp() {
+    System.out.println("Your current stats:");
+    System.out.println("Level: " + 1);
+    System.out.println("HP: " + 2);
+    System.out.println("Strength: " + 1);
+    System.out.println("Dexterity: " + 1);
+    System.out.println("Endurance: " + 1);
+    System.out.println("Crit Chance: " + 5 + "%");
+    System.out.println("\n\nChoose a stat to level up by typing its name, "
+        + "such as \"strength\" or \"HP\"");
   }
 }
