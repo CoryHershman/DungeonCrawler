@@ -74,8 +74,8 @@ public class Player extends Character {
         int effort = rand.nextInt(100) + 1; // effort between 1-100
         if (effort <= critChance) {
           monster.hitPoints = monster.hitPoints - (4 * strength); // monster takes 4x normal damage
-          System.out.println("\nYou have dealt a critical hit and dealt " 
-              + (4 * strength) + " damage!");
+          System.out
+              .println("\nYou have dealt a critical hit and dealt " + (4 * strength) + " damage!");
         } else { // If effort is greater than critChance
           monster.hitPoints = monster.hitPoints - strength; // monster takes normal damage
           System.out.println("\nYou have wounded the demon and dealt " + strength + " damage");
@@ -106,8 +106,8 @@ public class Player extends Character {
   // This method is used when the player is defeated. The game ends.
   public void defeated() {
     System.out.println("The monster has defeated you."
-        + "\nYour valiant journey has come to an end.\nYou made it to floor " 
-        + level + "\nBetter luck next time.");
+        + "\nYour valiant journey has come to an end.\nYou made it to floor " + level
+        + "\nBetter luck next time.");
     System.exit(0); // program ends
   }
 
@@ -116,49 +116,31 @@ public class Player extends Character {
   // Returns: Nothing
   // This method is used when the player levels up. The player chooses which stat
   // they wish to increase.
-  public void levelUp() {
-    Scanner scan = new Scanner(System.in); // Used to scan in user responses
-    String input; // Used to hold the user's response
-    Boolean validChoice; // Used to re-prompt user if they input a non-valid response
+  public Boolean levelUp(String input) {
 
-    System.out.println("Your current stats:");
-    System.out.println("Level: " + level);
-    System.out.println("HP: " + maxHitPoints);
-    System.out.println("Strength: " + strength);
-    System.out.println("Dexterity: " + dexterity);
-    System.out.println("Endurance: " + endurance);
-    System.out.println("Crit Chance: " + critChance + "%");
-    System.out.println("\n\nChoose a stat to level up by typing its name, "
-        + "such as \"strength\" or \"HP\"");
-
-    // The body of this do-while loop asks the player for a stat choice, 
-    // If they they enter a non-valid response, iterate
-    do {
-      validChoice = true; // validChoice set to true
-      input = scan.nextLine(); // Holds user's response
-      if (input.equalsIgnoreCase("HP")) { // If user inputs "hp"
-        maxHitPoints = maxHitPoints + 2; // Increase maxHitPoints by 2
-        System.out.println("Your HP has been increased to " + maxHitPoints + "\n");
-      } else if (input.equalsIgnoreCase("Strength")) { // If user inputs "strength"
-        strength = strength + 1; // Increase strength by 1
-        System.out.println("Your Strength has been increased to " + strength + "\n");
-      } else if (input.equalsIgnoreCase("Dexterity")) { // If user inputs "dexterity"
-        dexterity = dexterity + 1; // Increase dexterity by 1
-        hitChance = hitChance + 5; // Increase hitChance by 5
-        System.out.println("Your Dexterity has been increased to " + dexterity + "\n");
-      } else if (input.equalsIgnoreCase("Endurance")) { // If user inputs "endurance"
-        endurance = endurance + 1; // Increase endurance by 1
-        System.out.println("Your Endurance has been increased to " + endurance + "\n");
-      } else if (input.equalsIgnoreCase("Crit Chance") || input.equalsIgnoreCase("CritChance")) {
-        critChance = critChance + 5; // Increase critChance by 5
-        System.out.println("Your Crit Chance has been increased to " + critChance + "\n");
-      } else { // If user inputs a non-valid response
-        System.out.println("Your choice was not valid, "
-            + "type either \"HP\" \"Strength\" \"Dexterity\" \"Endurance\" or \"Crit Chance\"");
-        validChoice = false; // validChoice set to false
-      }
-    } while (!validChoice); // Iterate again if user's input was non-valid
+    if (input.equalsIgnoreCase("HP")) { // If user inputs "hp"
+      maxHitPoints = maxHitPoints + 2; // Increase maxHitPoints by 2
+      //System.out.println("Your HP has been increased to " + maxHitPoints + "\n");
+    } else if (input.equalsIgnoreCase("Strength")) { // If user inputs "strength"
+      strength = strength + 1; // Increase strength by 1
+      //System.out.println("Your Strength has been increased to " + strength + "\n");
+    } else if (input.equalsIgnoreCase("Dexterity")) { // If user inputs "dexterity"
+      dexterity = dexterity + 1; // Increase dexterity by 1
+      hitChance = hitChance + 5; // Increase hitChance by 5
+      //System.out.println("Your Dexterity has been increased to " + dexterity + "\n");
+    } else if (input.equalsIgnoreCase("Endurance")) { // If user inputs "endurance"
+      endurance = endurance + 1; // Increase endurance by 1
+      //System.out.println("Your Endurance has been increased to " + endurance + "\n");
+    } else if (input.equalsIgnoreCase("Crit Chance") || input.equalsIgnoreCase("CritChance")) {
+      critChance = critChance + 5; // Increase critChance by 5
+      //System.out.println("Your Crit Chance has been increased to " + critChance + "\n");
+    } else { // If user inputs a non-valid response
+      //System.out.println("Your choice was not valid, "
+      //    + "type either \"HP\" \"Strength\" \"Dexterity\" \"Endurance\" or \"Crit Chance\"");
+      return false; // client input a non-valid response, re-prompt client
+    }
     level = level + 1; // Increase player's level by 1
     hitPoints = maxHitPoints; // hit points become equal to max hit points
+    return true;
   }
 }
