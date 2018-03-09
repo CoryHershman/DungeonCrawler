@@ -7,7 +7,7 @@ Java 1.8 will be necessary to install and run the project. Java 1.8 can be downl
 # Installing
 Clone or download the DungeonCrawler repository. Then extract all files from the zip to your preferred location. 
 # Deploying
-Open the command prompt. Navigate to the directory cd command(s). If the directory is in downloads then the necessary command is: cd Downloads\DungeonCrawler-master\DungeonCrawler-master
+Open the command prompt. Navigate to the directory cd command(s). If the directory is in downloads then the necessary command is: cd Downloads\DungeonCrawler-master
 Then compile the code with: javac DungeonCrawler.java
 Then run the game with: java DungeonCrawler
 # Built With
