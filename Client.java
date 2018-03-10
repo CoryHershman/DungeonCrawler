@@ -38,14 +38,38 @@ public class Client extends Thread {
       
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
-        sendUpgradeChoice();
+        sendUpgrade();
       }
-      // next 5 lines receive and print out the game state
-      receiveGameState();
+      // receive and print out the game state
+      receiveState();
       
       System.out.println("You control your hero by typing in commands. \nThere are three commands: "
           + "\"right\" to move right, \"attack\" to attack, \"heal\" to heal wounds. "
           + "\nIt is also acceptable to type either \"r\" \"a\" or \"h\".\n");
+      
+      while(true) {
+        sendAction();
+        
+        packet = new DatagramPacket(buf, buf.length);
+        socket.receive(packet);
+        
+        if(buf[0] == 1) {
+          System.out.println(
+              "You have defeated the demon..... for now. You rest a bit and head up to the next floor\n");
+          sendUpgrade();
+        }
+        
+        
+        receiveState();
+        
+        buf = new byte[256];
+        packet = new DatagramPacket(buf, buf.length);
+        socket.receive(packet);
+        String hpTotals = new String(packet.getData());
+        System.out.println(hpTotals);
+        
+      }
+      
 
     } catch (IOException e) {
       System.err.println("IOException thrown: problem receiving or sending packet");
@@ -53,8 +77,32 @@ public class Client extends Thread {
     }
 
   }
+  
+  public void sendAction() throws IOException {
+    buf = new byte[256];
+    Scanner scan = new Scanner(System.in);
+    String input;
+    
+    while(true) {
+      input = scan.nextLine();
+      buf = input.getBytes();
+      packet = new DatagramPacket(buf, buf.length, address, 2018);
+      socket.send(packet);
+      
+      packet = new DatagramPacket(buf, buf.length);
+      socket.receive(packet);
+      
+      if(buf[0] == 1) {
+        System.out.println("That was not a valid input, type \"a\" \"h\" or \"r\" ");
+      } else {
+        break;
+      }
+    }
+    
+  }
 
-  public void sendUpgradeChoice() throws IOException {
+  public void sendUpgrade() throws IOException {
+    buf = new byte[256];
     Scanner scan = new Scanner(System.in);
     String input;
     
@@ -78,10 +126,9 @@ public class Client extends Thread {
       }
     }
     System.out.println("\nYou have leveled up your " + input + "\n");
-    //scan.close();
   }
   
-  public void receiveGameState() throws IOException {
+  public void receiveState() throws IOException {
     buf = new byte[256];
     packet = new DatagramPacket(buf, buf.length);
     socket.receive(packet);
