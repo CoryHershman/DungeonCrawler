@@ -14,6 +14,7 @@ public class Client extends Thread {
   private InetAddress address;
   private byte buf[] = new byte[256];
   private final int CLIENT_PORT = 2017;
+  int playerLevel = 0;;
 
   public Client() {
     try {
@@ -39,6 +40,7 @@ public class Client extends Thread {
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
         sendUpgrade();
+        playerLevel++;
       }
       // receive and print out the game state
       receiveState();
@@ -53,10 +55,16 @@ public class Client extends Thread {
         packet = new DatagramPacket(buf, buf.length);
         socket.receive(packet);
         
-        if(buf[0] == 1) {
+        if(buf[0] == 1) { // if monster dies
           System.out.println(
               "You have defeated the demon..... for now. You rest a bit and head up to the next floor\n");
           sendUpgrade();
+          playerLevel++;
+        } else if(buf[0] == 2) { // if player dies
+          System.out.println("The monster has defeated you."
+              + "\nYour valiant journey has come to an end.\nYou made it to floor " + playerLevel
+              + "\nBetter luck next time.");
+          System.exit(0);
         }
         
         
