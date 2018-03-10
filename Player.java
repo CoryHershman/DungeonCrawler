@@ -16,6 +16,7 @@ import java.util.Random;
 public class Player extends Character {
 
   Monster monster; // A link to the monster, for the purpose of calling methods from it
+  Dungeon dungeon;
   int critChance; // Critical hit chance when attacking
   int endurance; // Determines the amount healed when healing
   Random rand = new Random(); // Psuedo-random number generator
