@@ -15,6 +15,7 @@ import java.util.Random;
 public class Monster extends Character {
 
   Player player; // A link to the player, for the purpose of calling methods from it
+  Dungeon dungeon;
   Random rand = new Random(); // A Random Object, used for generating random numbers
 
   // Monster constructor
