@@ -27,34 +27,36 @@ public class Dungeon {
 
   // drawDungeon method
   // Requires: Nothing
-  // Returns: Prints out a drawing of the state of the dungeon
-  public void drawDungeon() {
-    System.out.print("_");
+  // Returns: String that represents the state of the dungeon
+  public String drawDungeon() {
+    String gameState = "";
+    gameState = gameState + "_";
     // For-loop draws the dungeon ceiling
     for (int i = 0; i < size; i++) {
-      System.out.print("_"); // Draws underscores to represent the ceiling
+      gameState = gameState + "_"; // Draws underscores to represent the ceiling
     }
-    System.out.println("_"); // Skips to next line
-    System.out.print("|"); // Draws the leftmost wall
+    gameState = gameState + "_\n"; // Skips to next line
+    gameState = gameState + "|"; // Draws the leftmost wall
 
     // For-loop draws the dungeon floor
     for (int i = 0; i < size; i++) {
       if (i == player.getPosition()) { // If the next space is the playerPosition
-        System.out.print("P"); // Print out P to represent the player's position
+        gameState = gameState + "P"; // Draw P to represent the player's position
       } else if (i == monster.getPosition()) { // If the next space is the monsterPosition
-        System.out.print("M"); // Print out M to represent the monster's position
+        gameState = gameState + "M"; // Draw M to represent the monster's position
       } else { // If the next space does not contain a player or monster
-        System.out.print("_"); // Draws underscore to represent the floor
+        gameState = gameState + "_"; // Draws underscore to represent the floor
       }
     }
-    System.out.println("|"); // Draws the rightmost wall
-
+    gameState = gameState + "|\n"; // Draws the rightmost wall
+    
     // If player and monster are next to each other, set inRange to true. If not, set inRange to false.
     if (player.getPosition() == monster.getPosition() - 1) {
       inRange = true;
     } else {
       inRange = false;
     }
+    return gameState;
   }
 
   // nextFloor method
@@ -65,8 +67,6 @@ public class Dungeon {
   public void nextFloor() {
     player.setPosition(0); // Player reset to position 0
     monster.setPosition(size - 1); // Monster reset to rightmost position
-    player.levelUp(); // Player levels up
-    monster.levelUp(); // Monster levels up
     if (player.level == 101) { // If player has finished the 100th floor, he/she wins the game
       System.out.println("Congratulations! You have made it to the top of the tower!"
           + "\nThe demon has been defeated and your valiant journey has come to an end.");
@@ -74,6 +74,5 @@ public class Dungeon {
           + "\nThe great hero who climbed the tower and fought day and night against the demon.");
       System.exit(0); // The program ends
     }
-    drawDungeon(); // Draws the current dungeon
   }
 }
