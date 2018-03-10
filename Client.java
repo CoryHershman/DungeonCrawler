@@ -29,8 +29,8 @@ public class Client extends Thread {
   }
 
   public void run() {
-    Scanner scan = new Scanner(System.in);
-    String input;
+    //Scanner scan = new Scanner(System.in);
+    //String input;
 
     try {
 
@@ -38,33 +38,10 @@ public class Client extends Thread {
       
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
-        DungeonCrawler.levelUp();
-
-        while(true) {
-          // client types in a stat to level up
-          input = scan.nextLine();
-          buf = input.getBytes();
-          packet = new DatagramPacket(buf, buf.length, address, 2018);
-          socket.send(packet); // the chosen stat gets sent to server
-          
-          packet = new DatagramPacket(buf, buf.length);
-          socket.receive(packet); // client waits to receive confirmation from server
-          // if the received packet was an error message, redo client input
-          if (buf[0] == 1) {
-            System.out.println("\nYour choice was not valid, "
-                + "type either \"HP\" \"Strength\" \"Dexterity\" \"Endurance\" or \"Crit Chance\"\n");
-          } else {
-            break;
-          }
-        }
-        System.out.println("\nYou have leveled up your " + input + "\n");
+        sendUpgradeChoice();
       }
       // next 5 lines receive and print out the game state
-      buf = new byte[256];
-      packet = new DatagramPacket(buf, buf.length);
-      socket.receive(packet);
-      String gameState = new String(packet.getData());
-      System.out.println(gameState);
+      receiveGameState();
       
       System.out.println("You control your hero by typing in commands. \nThere are three commands: "
           + "\"right\" to move right, \"attack\" to attack, \"heal\" to heal wounds. "
@@ -77,6 +54,41 @@ public class Client extends Thread {
 
   }
 
+  public void sendUpgradeChoice() throws IOException {
+    Scanner scan = new Scanner(System.in);
+    String input;
+    
+    DungeonCrawler.levelUp();
+
+    while(true) {
+      // client types in a stat to level up
+      input = scan.nextLine();
+      buf = input.getBytes();
+      packet = new DatagramPacket(buf, buf.length, address, 2018);
+      socket.send(packet); // the chosen stat gets sent to server
+      
+      packet = new DatagramPacket(buf, buf.length);
+      socket.receive(packet); // client waits to receive confirmation from server
+      // if the received packet was an error message, redo client input
+      if (buf[0] == 1) {
+        System.out.println("\nYour choice was not valid, "
+            + "type either \"HP\" \"Strength\" \"Dexterity\" \"Endurance\" or \"Crit Chance\"\n");
+      } else {
+        break;
+      }
+    }
+    System.out.println("\nYou have leveled up your " + input + "\n");
+    //scan.close();
+  }
+  
+  public void receiveGameState() throws IOException {
+    buf = new byte[256];
+    packet = new DatagramPacket(buf, buf.length);
+    socket.receive(packet);
+    String gameState = new String(packet.getData());
+    System.out.println(gameState);
+  }
+  
   public void close() {
     socket.close();
   }
