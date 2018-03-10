@@ -10,7 +10,6 @@
  Description: This class is used to create a Player object for the user to control. It inherits the Character.java abstract class.
  */
 
-import java.util.Scanner;
 import java.util.Random;
 
 public class Player extends Character {
@@ -109,7 +108,6 @@ public class Player extends Character {
     System.out.println("The monster has defeated you."
         + "\nYour valiant journey has come to an end.\nYou made it to floor " + level
         + "\nBetter luck next time.");
-    System.exit(0); // program ends
   }
 
   // levelUp method
