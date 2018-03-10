@@ -27,12 +27,15 @@ public class Server extends Thread {
     Player player = new Player();
     Monster monster = new Monster();
     Dungeon dungeon = new Dungeon(16, player, monster);
-    //Boolean validInput;
+    player.setMonster(monster);
+    player.setDungeon(dungeon);
+    monster.setPlayer(player);
+    monster.setDungeon(dungeon);
 
     try {
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
-        receiveUpgradeChoice(player);
+        receiveUpgrade(player);
       }
       // the following assignments to address and clientPort seem unneeded, but necessary to compile
       address = packet.getAddress();
@@ -46,10 +49,32 @@ public class Server extends Thread {
       
       // nextFloor method is called to start the first floor
       dungeon.nextFloor();
-      sendGameState(dungeon.drawDungeon());
+      sendState(dungeon.drawDungeon());
+      
+      while(true) {
+        receiveAction(player);
+        if(monster.hitPoints > 0) {
+          monster.moveLeft();
+          monster.attack();
+          buf[0] = 0;
+        } else {
+          monster.levelUp();
+          buf[0] = 1;
+        }
+        packet = new DatagramPacket(buf, buf.length, address, clientPort);
+        socket.send(packet);
+        if(buf[0] == 1) {
+          receiveUpgrade(player);
+        }
+        sendState(dungeon.drawDungeon());
         
-      // this is the original code from DungeonCrawler for the main game loop
-      // implement this as server-client
+        String hpTotals = ("Your HP: " + player.hitPoints 
+            + "     Monsters HP: " + monster.hitPoints);
+        buf = hpTotals.getBytes();
+        packet = new DatagramPacket(buf, buf.length, address, clientPort);
+        socket.send(packet);
+      }
+      
       /*
       Scanner scan = new Scanner(System.in);
       
@@ -81,9 +106,41 @@ public class Server extends Thread {
 
   }
   
-  public void receiveUpgradeChoice(Player player) throws IOException {
-    Boolean validInput;
+  public void receiveAction(Player player) throws IOException {
     buf = new byte[256];
+    Boolean validInput;
+    
+    do {
+      validInput = true;
+      packet = new DatagramPacket(buf, buf.length);
+      socket.receive(packet);
+      
+      String received = new String(packet.getData(), 0, packet.getLength());
+      
+      if(received.equalsIgnoreCase("right") || received.equalsIgnoreCase("r")) {
+        player.moveRight();
+      } else if(received.equalsIgnoreCase("attack") || received.equalsIgnoreCase("a")) {
+        player.attack();
+      } else if(received.equalsIgnoreCase("heal") || received.equalsIgnoreCase("h")) {
+        player.heal();
+      } else {
+        validInput = false;
+      }
+      
+      if(validInput == false) {
+        buf[0] = 1;
+      } else {
+        buf[0] = 0;
+      }
+      packet = new DatagramPacket(buf, buf.length, address, clientPort);
+      socket.send(packet);
+    } while (!validInput);
+    
+  }
+  
+  public void receiveUpgrade(Player player) throws IOException {
+    buf = new byte[256];
+    Boolean validInput;
     
     do {
       validInput = true;
@@ -105,7 +162,7 @@ public class Server extends Thread {
     } while (!validInput);
   }
   
-  public void sendGameState(String gameState) throws IOException {
+  public void sendState(String gameState) throws IOException {
     buf = gameState.getBytes();
     packet = new DatagramPacket(buf, buf.length, address, clientPort);
     socket.send(packet);
