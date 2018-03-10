@@ -27,31 +27,12 @@ public class Server extends Thread {
     Player player = new Player();
     Monster monster = new Monster();
     Dungeon dungeon = new Dungeon(16, player, monster);
-    InetAddress address;
-    int clientPort;
-    Boolean validInput;
+    //Boolean validInput;
 
     try {
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
-        do {
-          validInput = true;
-          packet = new DatagramPacket(buf, buf.length);
-          socket.receive(packet); // server receives client's chosen stat
-          address = packet.getAddress(); // learned client's address
-          clientPort = packet.getPort(); // learned client's port
-          
-          String received = new String(packet.getData(), 0, packet.getLength());
-          validInput = player.levelUp(received); // client's chosen stat sent to levelUp method
-          
-          if(validInput == false) {
-            buf[0] = 1; // if the client's input was non-valid, send error message
-          } else {
-            buf[0] = 0; // else, send confirmation message
-          }
-          packet = new DatagramPacket(buf, buf.length, address, clientPort);
-          socket.send(packet); // send packet to client with error or confirmation message
-        } while (!validInput);
+        receiveUpgradeChoice(player);
       }
       // the following assignments to address and clientPort seem unneeded, but necessary to compile
       address = packet.getAddress();
@@ -65,11 +46,7 @@ public class Server extends Thread {
       
       // nextFloor method is called to start the first floor
       dungeon.nextFloor();
-      String gameState = dungeon.drawDungeon();
-      System.out.println(gameState);
-      buf = gameState.getBytes();
-      packet = new DatagramPacket(buf, buf.length, address, clientPort);
-      socket.send(packet);
+      sendGameState(dungeon.drawDungeon());
         
       // this is the original code from DungeonCrawler for the main game loop
       // implement this as server-client
@@ -102,6 +79,37 @@ public class Server extends Thread {
       e.printStackTrace();
     }
 
+  }
+  
+  public void receiveUpgradeChoice(Player player) throws IOException {
+    Boolean validInput;
+    buf = new byte[256];
+    
+    do {
+      validInput = true;
+      packet = new DatagramPacket(buf, buf.length);
+      socket.receive(packet); // server receives client's chosen stat
+      address = packet.getAddress(); // learned client's address
+      clientPort = packet.getPort(); // learned client's port
+      
+      String received = new String(packet.getData(), 0, packet.getLength());
+      validInput = player.levelUp(received); // client's chosen stat sent to levelUp method
+      
+      if(validInput == false) {
+        buf[0] = 1; // if the client's input was non-valid, send error message
+      } else {
+        buf[0] = 0; // else, send confirmation message
+      }
+      packet = new DatagramPacket(buf, buf.length, address, clientPort);
+      socket.send(packet); // send packet to client with error or confirmation message
+    } while (!validInput);
+  }
+  
+  public void sendGameState(String gameState) throws IOException {
+    buf = gameState.getBytes();
+    packet = new DatagramPacket(buf, buf.length, address, clientPort);
+    socket.send(packet);
+    buf = new byte[256];
   }
 
   public void close() {
