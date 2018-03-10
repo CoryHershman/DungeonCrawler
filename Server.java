@@ -12,7 +12,6 @@ public class Server extends Thread {
   InetAddress address;
   int clientPort;
   private byte[] buf = new byte[256]; // buffer for the packet
-  private boolean running;
 
   public Server() {
     try {
@@ -28,17 +27,19 @@ public class Server extends Thread {
     Player player = new Player();
     Monster monster = new Monster();
     Dungeon dungeon = new Dungeon(16, player, monster);
+    InetAddress address;
+    int clientPort;
     Boolean validInput;
 
     try {
-      // for loop runs 9 times for 9 level ups
-      for (int i = 0; i < 9; i++) {
+      // for loop runs 10 times for 10 level ups
+      for (int i = 0; i < 10; i++) {
         do {
           validInput = true;
           packet = new DatagramPacket(buf, buf.length);
           socket.receive(packet); // server receives client's chosen stat
-          InetAddress address = packet.getAddress(); // learned client's address
-          int clientPort = packet.getPort(); // learned client's port
+          address = packet.getAddress(); // learned client's address
+          clientPort = packet.getPort(); // learned client's port
           
           String received = new String(packet.getData(), 0, packet.getLength());
           validInput = player.levelUp(received); // client's chosen stat sent to levelUp method
@@ -52,21 +53,24 @@ public class Server extends Thread {
           socket.send(packet); // send packet to client with error or confirmation message
         } while (!validInput);
       }
-      
+      // the following assignments to address and clientPort seem unneeded, but necessary to compile
+      address = packet.getAddress();
+      clientPort = packet.getPort();
+      // monster levels up 5 times
       monster.levelUp();
       monster.levelUp();
       monster.levelUp();
       monster.levelUp();
+      monster.levelUp();
       
-      // nextFloor method is called to start the first floor. Both the player and
-      // monster level up 1 more time
-      //dungeon.nextFloor();
-      
-    //This message needs to show up on the client side
-    /*System.out.println("You control your hero by typing in commands. \nThere are three commands: "
-        + "\"right\" to move right, \"attack\" to attack, \"heal\" to heal wounds. "
-        + "\nIt is also acceptable to type either \"r\" \"a\" or \"h\".\n");*/
-      
+      // nextFloor method is called to start the first floor
+      dungeon.nextFloor();
+      String gameState = dungeon.drawDungeon();
+      System.out.println(gameState);
+      buf = gameState.getBytes();
+      packet = new DatagramPacket(buf, buf.length, address, clientPort);
+      socket.send(packet);
+        
       // this is the original code from DungeonCrawler for the main game loop
       // implement this as server-client
       /*
