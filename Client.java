@@ -18,7 +18,7 @@ public class Client extends Thread {
   public Client() {
     try {
       socket = new DatagramSocket(CLIENT_PORT);
-      address = InetAddress.getByName("localhost");
+      address = InetAddress.getByName("localhost"); // need to find out how to get Server's IP
     } catch (SocketException e) {
       System.err.println("Was not able to create a socket on port " + CLIENT_PORT);
       e.printStackTrace();
@@ -36,8 +36,8 @@ public class Client extends Thread {
 
       DungeonCrawler.start();
       
-      // for loop runs 9 times for 9 level ups
-      for (int i = 0; i < 9; i++) {
+      // for loop runs 10 times for 10 level ups
+      for (int i = 0; i < 10; i++) {
         DungeonCrawler.levelUp();
 
         while(true) {
@@ -58,8 +58,17 @@ public class Client extends Thread {
           }
         }
         System.out.println("\nYou have leveled up your " + input + "\n");
-
       }
+      // next 5 lines receive and print out the game state
+      buf = new byte[256];
+      packet = new DatagramPacket(buf, buf.length);
+      socket.receive(packet);
+      String gameState = new String(packet.getData());
+      System.out.println(gameState);
+      
+      System.out.println("You control your hero by typing in commands. \nThere are three commands: "
+          + "\"right\" to move right, \"attack\" to attack, \"heal\" to heal wounds. "
+          + "\nIt is also acceptable to type either \"r\" \"a\" or \"h\".\n");
 
     } catch (IOException e) {
       System.err.println("IOException thrown: problem receiving or sending packet");
