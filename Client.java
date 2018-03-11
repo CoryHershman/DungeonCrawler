@@ -14,6 +14,7 @@ public class Client extends Thread {
   private InetAddress address;
   private byte buf[] = new byte[256];
   private final int CLIENT_PORT = 2017;
+  private final int SERVER_PORT = 2018;
   int playerLevel = 0;;
 
   public Client() {
@@ -30,11 +31,11 @@ public class Client extends Thread {
   }
 
   public void run() {
-    //Scanner scan = new Scanner(System.in);
-    //String input;
-
     try {
-
+      
+      packet = new DatagramPacket(buf, buf.length, address, SERVER_PORT);
+      socket.send(packet);
+      
       DungeonCrawler.start();
       
       // for loop runs 10 times for 10 level ups
@@ -94,7 +95,7 @@ public class Client extends Thread {
     while(true) {
       input = scan.nextLine();
       buf = input.getBytes();
-      packet = new DatagramPacket(buf, buf.length, address, 2018);
+      packet = new DatagramPacket(buf, buf.length, address, SERVER_PORT);
       socket.send(packet);
       
       packet = new DatagramPacket(buf, buf.length);
@@ -114,13 +115,19 @@ public class Client extends Thread {
     Scanner scan = new Scanner(System.in);
     String input;
     
-    DungeonCrawler.levelUp();
+    //DungeonCrawler.levelUp();
+    packet = new DatagramPacket(buf, buf.length);
+    socket.receive(packet);
+    String playerStats = new String(packet.getData());
+    System.out.println(playerStats);
+    
+    buf = new byte[256];
 
     while(true) {
       // client types in a stat to level up
       input = scan.nextLine();
       buf = input.getBytes();
-      packet = new DatagramPacket(buf, buf.length, address, 2018);
+      packet = new DatagramPacket(buf, buf.length, address, SERVER_PORT);
       socket.send(packet); // the chosen stat gets sent to server
       
       packet = new DatagramPacket(buf, buf.length);
