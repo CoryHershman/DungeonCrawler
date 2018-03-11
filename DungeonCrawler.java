@@ -26,7 +26,7 @@ public class DungeonCrawler {
       Client client = new Client();
       client.run();
     }
-    
+    scan.close();
   }
 
   public static void start() {
@@ -52,19 +52,5 @@ public class DungeonCrawler {
     System.out.println("Crit Chance is the chance that you will deal 4x damage when attacking");
     System.out.println("Tip: There is no need to ever have a dexterity above 17 "
         + "or a crit chance above 100\n");
-
-    
-  }
-  
-  public static void levelUp() {
-    System.out.println("Your current stats:");
-    System.out.println("Level: " + 1);
-    System.out.println("HP: " + 2);
-    System.out.println("Strength: " + 1);
-    System.out.println("Dexterity: " + 1);
-    System.out.println("Endurance: " + 1);
-    System.out.println("Crit Chance: " + 5 + "%");
-    System.out.println("\n\nChoose a stat to level up by typing its name, "
-        + "such as \"strength\" or \"HP\"");
   }
 }
