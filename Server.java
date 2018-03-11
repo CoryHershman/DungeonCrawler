@@ -33,6 +33,11 @@ public class Server extends Thread {
     monster.setDungeon(dungeon);
 
     try {
+      packet = new DatagramPacket(buf, buf.length);
+      socket.receive(packet); // receive a packet from client to make obtain information
+      address = packet.getAddress(); // get the address of client's socket
+      clientPort = packet.getPort(); // get the port of client's socket
+      
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
         receiveUpgrade(player);
@@ -124,13 +129,27 @@ public class Server extends Thread {
   public void receiveUpgrade(Player player) throws IOException {
     buf = new byte[256];
     Boolean validInput;
-
+    
+    String playerStats = "Your current stats:";
+    playerStats = playerStats + "\nLevel: " + player.level;
+    playerStats = playerStats + "\nHP: " + player.maxHitPoints;
+    playerStats = playerStats + "\nStrength: " + player.strength;
+    playerStats = playerStats + "\nDexterity: " + player.dexterity;
+    playerStats = playerStats + "\nEndurance: " + player.endurance;
+    playerStats = playerStats + "\nCrit Chance: " + player.critChance;
+    playerStats = playerStats + "\n\nChoose a stat to level up by typing its name, "
+        + "such as \"strength\" or \"HP\"";
+    
+    buf = playerStats.getBytes();
+    packet = new DatagramPacket(buf, buf.length, address, clientPort);
+    socket.send(packet);
+    
+    buf = new byte[256];
+    
     do {
       validInput = true;
       packet = new DatagramPacket(buf, buf.length);
       socket.receive(packet); // server receives client's chosen stat
-      address = packet.getAddress(); // learned client's address
-      clientPort = packet.getPort(); // learned client's port
 
       String received = new String(packet.getData(), 0, packet.getLength());
       validInput = player.levelUp(received); // client's chosen stat sent to levelUp method
