@@ -26,8 +26,6 @@ abstract class Character {
 
   abstract void setDungeon(Dungeon dungeon); // Used to set up the link to the hosting dungeon
 
-  abstract void levelUp(); // Used to level up the character's stats
-
   abstract void attack(); // Used for attacking other characters
 
   abstract void defeated(); // Used when the character is defeated
@@ -46,3 +44,4 @@ abstract class Character {
     position = i;
   }
 }
+
