@@ -1,4 +1,16 @@
 
+/*
+ Programmer: Cory Hershman
+ Class: Introduction to Networking
+ Instructor: Mr. Wilson
+ Assignment #: P0001
+ Due Date: 3/31/2018
+ Last Update: 3/31/2018
+ Related Files: Dungeon.java, Character.java, Player.java, Monster.java, Client.java
+ Description: This class creates a Server object that houses the logic of the DungeonCrawler game.
+ Interfaces with the Client class to send and receive packet.
+ */
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
@@ -8,9 +20,9 @@ import java.net.SocketException;
 public class Server extends Thread {
 
   private DatagramSocket socket; // socket that will receive packets
-  private DatagramPacket packet;
-  InetAddress address;
-  int clientPort;
+  private DatagramPacket packet; // packet that will be used by the socket
+  InetAddress address; // will hold the address of the client
+  int clientPort; // will hold the port number of the client
   private byte[] buf = new byte[256]; // buffer for the packet
 
   public Server() {
@@ -22,11 +34,17 @@ public class Server extends Thread {
     }
   }
 
+  // run method
+  // Requires: Nothing
+  // Returns: Nothing
+  // The run method acts like a main method for this thread/class.
   public void run() {
 
-    Player player = new Player();
-    Monster monster = new Monster();
-    Dungeon dungeon = new Dungeon(16, player, monster);
+    Player player = new Player(); // create Player object
+    Monster monster = new Monster(); // create Monster object
+    Dungeon dungeon = new Dungeon(16, player, monster); // create dungeon object, size 16
+
+    // set necessary links between objects
     player.setMonster(monster);
     player.setDungeon(dungeon);
     monster.setPlayer(player);
@@ -37,7 +55,7 @@ public class Server extends Thread {
       socket.receive(packet); // receive a packet from client to make obtain information
       address = packet.getAddress(); // get the address of client's socket
       clientPort = packet.getPort(); // get the port of client's socket
-      
+
       // for loop runs 10 times for 10 level ups
       for (int i = 0; i < 10; i++) {
         receiveUpgrade(player);
@@ -53,56 +71,59 @@ public class Server extends Thread {
       monster.levelUp();
       monster.levelUp();
 
-      // nextFloor method is called to start the first floor
-      dungeon.nextFloor();
-      sendState(dungeon.drawDungeon());
+      dungeon.nextFloor(); // nextFloor method is called to start the first floor
+      sendState(dungeon.drawDungeon()); // send the game state to the client
 
+      // start of the game loop
       while (true) {
-        receiveAction(player);
-        if (monster.hitPoints > 0) {
-          monster.moveLeft();
-          monster.attack();
-          if (player.hitPoints > 0) {
-            buf[0] = 0; // monster lives, player lives
-          } else {
-            buf[0] = 2; // player dies
+        receiveAction(player); // wait for client to choose their action
+        if (monster.hitPoints > 0) { // if the monster is still alive
+          monster.moveLeft(); // monster moves left
+          monster.attack(); // monster attacks player
+          if (player.hitPoints > 0) { // if the player is also alive
+            buf[0] = 0; // message says the monster lives, and the player lives
+          } else { // if the player is not alive
+            buf[0] = 2; // message says the player died
           }
-        } else {
-          monster.levelUp();
-          buf[0] = 1; // monster dies
+        } else { // if the monster is dead
+          monster.levelUp(); // level up the monster
+          buf[0] = 1; // message says the monster died
         }
-        packet = new DatagramPacket(buf, buf.length, address, clientPort);
-        socket.send(packet);
-        if (buf[0] == 1) {
-          receiveUpgrade(player);
-        } else if (buf[0] == 2) {
-          System.exit(0);
+        packet = new DatagramPacket(buf, buf.length, address, clientPort); // outgoing packet
+        socket.send(packet); // send packet with the message
+        if (buf[0] == 1) { // if the monster died
+          receiveUpgrade(player); // wait for client to choose their upgrade
+        } else if (buf[0] == 2) { // if the player died
+          close();
+          System.exit(0); // end the system
         }
-        sendState(dungeon.drawDungeon());
+        sendState(dungeon.drawDungeon()); // send the game state to the client
 
         String hpTotals = ("Your HP: " + player.hitPoints + "     Monsters HP: "
             + monster.hitPoints);
         buf = hpTotals.getBytes();
-        packet = new DatagramPacket(buf, buf.length, address, clientPort);
-        socket.send(packet);
-      }
+        packet = new DatagramPacket(buf, buf.length, address, clientPort); // outgoing packet
+        socket.send(packet); // send the hp totals of the player and monster to the client
+      } // end of the game loop
 
     } catch (IOException e) {
       System.err.println("IOException thrown: problem receiving or sending packet");
       e.printStackTrace();
     }
-
   }
 
+  // receiveAction method
+  // Requires: The Player object
+  // Returns: Nothing
+  // Server waits for the client to choose their action. Tells the client if the action was valid.
   public void receiveAction(Player player) throws IOException {
-    buf = new byte[256];
+    buf = new byte[256]; // reset the size of the buffer
     Boolean validInput;
 
     do {
       validInput = true;
-      packet = new DatagramPacket(buf, buf.length);
-      socket.receive(packet);
-
+      packet = new DatagramPacket(buf, buf.length); // incoming packet
+      socket.receive(packet); // receive the clients action choice
       String received = new String(packet.getData(), 0, packet.getLength());
 
       if (received.equalsIgnoreCase("right") || received.equalsIgnoreCase("r")) {
@@ -115,21 +136,26 @@ public class Server extends Thread {
         validInput = false;
       }
 
-      if (validInput == false) {
-        buf[0] = 1;
-      } else {
-        buf[0] = 0;
+      if (validInput == false) { // if client's input is not valid
+        buf[0] = 1; // send error message
+      } else { // if client's input is valid
+        buf[0] = 0; // send confirmation message
       }
       packet = new DatagramPacket(buf, buf.length, address, clientPort);
-      socket.send(packet);
-    } while (!validInput);
+      socket.send(packet); // send message
+    } while (!validInput); // if the input was not valid, re-prompt client
 
   }
 
+  // receiveUpgrade method
+  // Requires: The Player object
+  // Returns: Nothing
+  // Waits for the client to choose their upgrade for their character. Calls the player.levelUp
+  // method to handle the logic. Tells the client if their choice was valid.
   public void receiveUpgrade(Player player) throws IOException {
-    buf = new byte[256];
+    buf = new byte[256]; // reset buffer's size
     Boolean validInput;
-    
+
     String playerStats = "Your current stats:";
     playerStats = playerStats + "\nLevel: " + player.level;
     playerStats = playerStats + "\nHP: " + player.maxHitPoints;
@@ -139,13 +165,13 @@ public class Server extends Thread {
     playerStats = playerStats + "\nCrit Chance: " + player.critChance;
     playerStats = playerStats + "\n\nChoose a stat to level up by typing its name, "
         + "such as \"strength\" or \"HP\"";
-    
+
     buf = playerStats.getBytes();
     packet = new DatagramPacket(buf, buf.length, address, clientPort);
-    socket.send(packet);
-    
-    buf = new byte[256];
-    
+    socket.send(packet); // send playerStats to the client
+
+    buf = new byte[256]; // reset buffer's size
+
     do {
       validInput = true;
       packet = new DatagramPacket(buf, buf.length);
@@ -161,16 +187,24 @@ public class Server extends Thread {
       }
       packet = new DatagramPacket(buf, buf.length, address, clientPort);
       socket.send(packet); // send packet to client with error or confirmation message
-    } while (!validInput);
+    } while (!validInput); // if the client's input was not valid, re-prompt client
   }
 
+  // sendState method
+  // Requires: A String that represents the game state
+  // Returns: Nothing
+  // Sends the representation of the game state to the client
   public void sendState(String gameState) throws IOException {
     buf = gameState.getBytes();
     packet = new DatagramPacket(buf, buf.length, address, clientPort);
-    socket.send(packet);
-    buf = new byte[256];
+    socket.send(packet); // send the game state to the client
+    buf = new byte[256]; // reset the buffer's size
   }
 
+  // close method
+  // Requires: Nothing
+  // Returns: Nothing
+  // Closes the socket
   public void close() {
     socket.close();
   }
