@@ -1,5 +1,5 @@
 # DungeonCrawler
-A simple Dungeon Crawler for a class project. Created in java. Climb up the 100 floors of the tower, fighting a battle of attrition against a demon.
+A networked Dungeon Crawler for a class project. Created in java. Climb up the 100 floors of the tower, fighting a battle of attrition against a demon.
 # Getting Started
 These instructions will allow you to get a copy of the project up and running.
 # Prerequisites
@@ -10,6 +10,9 @@ Clone or download the DungeonCrawler repository. Then extract all files from the
 Open the command prompt. Navigate to the directory cd command(s). If the directory is in downloads then the necessary command is: cd Downloads\DungeonCrawler-master
 Then compile the code with: javac DungeonCrawler.java
 Then run the game with: java DungeonCrawler
+Type in "Server"
+Then open another command prompt. Enter the same commands and type in "Client" instead of "Server"
+The game is played from the client.
 # Built With
 Java 1.8 jdk
 # Author
